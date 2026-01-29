@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link href="assets/img/favicon.png" rel="icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            font-size: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        #cartCount {
+            background-color: #ff5722;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            
+        }
+        .cartcount{
+            margin-left: 700px;
+        }
+        #cartCount:hover {
+            background-color: #e64a19;
+            transform: scale(1.1);
+        }
+        #cartCount:active {
+            background-color: #d84315;
+            transform: scale(0.95);
+        }
+        main {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #ffffff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        li:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        li:active {
+            transform: scale(0.98);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+        .item-details {
+            flex-grow: 1;
+            text-align: left;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .remove-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .remove-btn:hover {
+            background-color: #c82333;
+        }
+        .remove-btn:active {
+            background-color: #a71d2a;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+        .quantity-btn:hover {
+            background-color: #218838;
+        }
+        .quantity-btn:active {
+            background-color: #1e7e34;
+        }
+        .quantity-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        button:active {
+            background-color: #1e7e34;
+        }
+        #checkoutBtn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <header >
+        <h1 onclick="window.location.href='home.html';">Your Shopping Cart</h1>
+        <div id="cartCount" class="cartcount">Cart: 0</div>
+        <!-- <div id="cartCount" onclick="window.location.href='signout.php';" >LogOut</div> -->
+    </header>
+    <main>
+        <ul id="cartItems">
+            <!-- Cart items will be listed here -->
+        </ul>
+        <p><strong>Total: Rs.<span id="cartTotal">0</span></strong></p>
+        <a href="signup.html">
+        <button id="checkoutBtn" disabled>Checkout</button> </a>
+    </main>
+    <script>
+        window.history.forward();
+        function noBack() {
+            window.history.forward();
+        }
+        window.onload = noBack;
+    </script>
+    <script>
+        // Function to add an item to the cart with quantity 1
+        function addItemToCart(item) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItemIndex = cart.findIndex(cartItem => cartItem.name === item.name);
+            if (existingItemIndex !== -1) {
+                // If item already exists in cart, just update the quantity
+                cart[existingItemIndex].quantity += 1;
+            } else {
+                // If item doesn't exist, add it with quantity 1
+                item.quantity = 1;
+                cart.push(item);
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+        }
+
+        function updateCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartItemsContainer = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            cartItemsContainer.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                
+                const itemDetails = document.createElement('div');
+                itemDetails.classList.add('item-details');
+                itemDetails.textContent = `${item.name} - Rs.${item.price} x ${item.quantity}`;
+                
+                const quantityControl = document.createElement('div');
+                quantityControl.classList.add('quantity-control');
+                
+                const decreaseBtn = document.createElement('button');
+                decreaseBtn.textContent = '-';
+                decreaseBtn.classList.add('quantity-btn');
+                decreaseBtn.onclick = function() {
+                    updateQuantity(index, item.quantity - 1);
+                };
+                
+                const quantityDisplay = document.createElement('span');
+                quantityDisplay.classList.add('quantity-display');
+                quantityDisplay.textContent = item.quantity;
+
+                const increaseBtn = document.createElement('button');
+                increaseBtn.textContent = '+';
+                increaseBtn.classList.add('quantity-btn');
+                increaseBtn.onclick = function() {
+                    updateQuantity(index, item.quantity + 1);
+                };
+                
+                quantityControl.appendChild(decreaseBtn);
+                quantityControl.appendChild(quantityDisplay);
+                quantityControl.appendChild(increaseBtn);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remove';
+                removeBtn.classList.add('remove-btn');
+                removeBtn.onclick = function() {
+                    removeFromCart(index);
+                };
+                
+                listItem.appendChild(itemDetails);
+                listItem.appendChild(quantityControl);
+                listItem.appendChild(removeBtn);
+                
+                cartItemsContainer.appendChild(listItem);
+                total += item.price * item.quantity;
+            });
+
+            cartTotal.textContent = total.toFixed(2);
+            updateCartCount();
+
+            // Disable checkout button if total is 0
+            checkoutBtn.disabled = total === 0;
+        }
+
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            document.getElementById('cartCount').textContent = `Cart: ${cart.length}`;
+        }
+
+        function updateQuantity(index, newQuantity) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (newQuantity <= 0) {
+                cart.splice(index, 1);
+            } else {
+                cart[index].quantity = newQuantity;
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+        }
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+        }
+
+        document.getElementById('checkoutBtn').addEventListener('click', function() {
+            if (this.disabled) return;  // Prevent if the button is disabled
+
+            // Check if the user is logged in
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                // Redirect to signup if not logged in
+                window.location.href = 'signup.html';
+            } else {
+                // Proceed with checkout if logged in and total > 0
+                alert('Checkout process started!');
+            }
+        });
+
+        updateCart();
+    </script>
+</body>
+</html>
